@@ -40,9 +40,12 @@ MainRomContent = []
 SequencerRomContent = []
 SequencerRomEntries = []
 heapq.heapify(SequencerRomEntries)
-CondRomContent =[]
+CondRomContent = []
 CondRomEntries = []
 heapq.heapify(CondRomEntries)
+IntRomContent = []
+IntRomEntries = []
+heapq.heapify(IntRomEntries)
 
 class SequencerEntry:
     def __init__(self, name: str, value: int, target: str):
@@ -70,6 +73,19 @@ class CondEntry:
 
     def __str__(self):
         return "COND: (%s)[%01X]: %s" % (self.name, self.value, self.target)
+
+class IntEntry:
+    def __init__(self, name: str, value: int, target: str):
+        self.name = name
+        self.value = value
+        self.target = target
+        pass
+
+    def __repr__(self) -> str:
+        return self.__str__()
+
+    def __str__(self):
+        return "INT: (%s)[%01X]: %s" % (self.name, self.value, self.target)
 
 class MicrocodeSignal:
     def __init__(self, name, value):
@@ -127,6 +143,14 @@ class uclangListener(ParseTreeListener):
         num = ctx.number().numVal
         condEnt = CondEntry(ids[0], num, ids[1])
         heapq.heappush(CondRomEntries, (num, condEnt))
+        pass
+
+    # Exit a parse tree produced by uclangParser#ucIntStmt.
+    def exitUcIntStmt(self, ctx:uclangParser.UcIntStmtContext):
+        ids = list(map(toText, ctx.IDENTIFIER()))
+        num = ctx.number().numVal
+        intEnt = IntEntry(ids[0], num, ids[1])
+        heapq.heappush(IntRomEntries, (num, intEnt))
         pass
 
     # Exit a parse tree produced by uclangParser#ucSignalStmt.
@@ -293,10 +317,24 @@ if __name__ == '__main__':
             CondRomContent.append(resolvedValue)
         print(entry[1])
 
+    print('INT Entries: ')
+    while len(IntRomEntries) > 0:
+        entry = heapq.heappop(IntRomEntries)
+        resolvedValue = resolve_sequencer_cond_entry(entry[1])
+        while len(IntRomContent) < entry[0]:
+            IntRomContent.append('%07x' % 0)
+        if len(IntRomContent) != entry[0]:
+            print("Something very bad happened")
+            exit(-1)
+        else:
+            IntRomContent.append(resolvedValue)
+        print(entry[1])
+
     print('===========OUTPUT===============')
     print("MAIN: ", MainRomContent)
     print("SEQ:  ", SequencerRomContent)
     print("COND: ", CondRomContent)
+    print("INT: ", IntRomContent)
     output = args.o
     with open(('%s_main.dat' % output), 'w') as mainFile:
         mainFile.write(' '.join(MainRomContent))
@@ -306,4 +344,7 @@ if __name__ == '__main__':
         seqFile.flush()
     with open(('%s_cond.dat' % output), 'w') as condFile:
         condFile.write(' '.join(CondRomContent))
+        condFile.flush()
+    with open(('%s_int.dat' % output), 'w') as condFile:
+        condFile.write(' '.join(IntRomContent))
         condFile.flush()

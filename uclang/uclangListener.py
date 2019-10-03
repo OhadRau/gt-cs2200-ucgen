@@ -1,4 +1,4 @@
-# Generated from /home/codetector/projects/course/cs2200/mcgen/uclang.g4 by ANTLR 4.7.2
+# Generated from uclang.g4 by ANTLR 4.7.2
 from antlr4 import *
 if __name__ is not None and "." in __name__:
     from .uclangParser import uclangParser
@@ -50,6 +50,15 @@ class uclangListener(ParseTreeListener):
 
     # Exit a parse tree produced by uclangParser#ucCmpStmt.
     def exitUcCmpStmt(self, ctx:uclangParser.UcCmpStmtContext):
+        pass
+
+
+    # Enter a parse tree produced by uclangParser#ucIntStmt.
+    def enterUcIntStmt(self, ctx:uclangParser.UcIntStmtContext):
+        pass
+
+    # Exit a parse tree produced by uclangParser#ucIntStmt.
+    def exitUcIntStmt(self, ctx:uclangParser.UcIntStmtContext):
         pass
 
 
